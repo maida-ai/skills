@@ -1,5 +1,6 @@
 # PR <PR_NUMBER> Review Resolution Report
 
+Save as: `_ai_report/pr-<PR_NUMBER>-<DATE>.md`
 Generated: <DATE>
 Repository: <OWNER>/<REPO>
 PR: <PR_NUMBER>

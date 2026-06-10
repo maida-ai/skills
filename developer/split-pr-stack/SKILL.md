@@ -9,7 +9,7 @@ Use this skill to split oversized PR changes into reviewable atomic commits on t
 
 ## Resources
 
-- `assets/split-plan-template.md`: copy this shape into `_split_report/` before rewriting history.
+- `assets/split-plan-template.md`: copy this shape into `_ai_report/` before rewriting history.
 - `scripts/get-review-comments`: fetch grouped PR review comments as JSON when PR review comments should inform split boundaries.
 - `scripts/pr-review-comments.graphql`: GraphQL query used by the helper.
 - `scripts/group-by-commit.jq`: jq transformer used by the helper.
@@ -25,7 +25,7 @@ Use this skill to split oversized PR changes into reviewable atomic commits on t
 - Stage only explicit files or hunks that belong to the next atomic commit.
 - Inspect `git diff --cached --name-only` and `git diff --cached` before every commit.
 - Use editor-safe rebase continuation: `GIT_EDITOR=true git rebase --continue`.
-- Keep `_split_report/` local and unstaged unless the user asks to include it in the PR.
+- Keep `_ai_report/` local and unstaged unless the user asks to include it in the PR.
 
 ## Atomicity Criteria
 
@@ -45,7 +45,7 @@ Avoid commits that mix unrelated cleanup, change public behavior without tests, 
 2. Read the PR title/body, review comments, modified files, aggregate diff, and current commit list.
 3. Identify the PR's promised scope, implemented components, missing promised behavior, and out-of-scope behavior.
 4. Report scope concerns to the user before rewriting if the PR does not do what it promises or does extra unrelated work.
-5. Write a split plan in `_split_report/pr-split-<DATE>.md` using `assets/split-plan-template.md`.
+5. Write a split plan in `_ai_report/pr-NUM-DATE.md`, `_ai_report/commit-COMMITID-DATE.md`, or `_ai_report/local-split-DATE.md` using `assets/split-plan-template.md`.
 6. Create a backup branch.
 7. Choose the rewrite strategy: tip/uncommitted split, single historical commit split, or multi-commit stack split.
 8. Build each atomic commit with explicit staging only.
@@ -95,15 +95,15 @@ if [ -z "$SKILL_DIR" ]; then
   echo "Set SKILL_DIR to the installed split-pr-stack skill directory" >&2
   exit 1
 fi
-mkdir -p _split_report
+mkdir -p _ai_report
 REVIEW_HELPER="$SKILL_DIR/scripts/get-review-comments"
-COMMENTS_JSON="_split_report/pr-${PR}-comments-$(date +%Y%m%d).json"
+COMMENTS_JSON="_ai_report/pr-${PR}-comments-$(date +%Y%m%d).json"
 if [ -x "$REVIEW_HELPER" ]; then
   if ! "$REVIEW_HELPER" -o "$OWNER" -r "$REPO" -p "$PR" -u > "$COMMENTS_JSON" 2> "${COMMENTS_JSON}.err"; then
-    gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_split_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
+    gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_ai_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
   fi
 else
-  gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_split_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
+  gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_ai_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
 fi
 ```
 
@@ -140,8 +140,14 @@ git branch "$BACKUP_BRANCH"
 Create a local report:
 
 ```bash
-mkdir -p _split_report
-SPLIT_REPORT="_split_report/pr-split-$(date +%Y%m%d).md"
+mkdir -p _ai_report
+if [ -n "${PR:-}" ]; then
+  SPLIT_REPORT="_ai_report/pr-${PR}-$(date +%Y%m%d).md"
+elif [ -n "${ORIGINAL_SHA:-}" ]; then
+  SPLIT_REPORT="_ai_report/commit-${ORIGINAL_SHA:0:12}-$(date +%Y%m%d).md"
+else
+  SPLIT_REPORT="_ai_report/local-split-$(date +%Y%m%d).md"
+fi
 ```
 
 Use `assets/split-plan-template.md`. Record:

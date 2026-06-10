@@ -71,7 +71,7 @@ or:
 Use $commit-stack-review to address this PR's review comments while preserving its atomic commit stack.
 ```
 
-Both skills are intentionally local-first: they create local report directories such as `_split_report/` and `_review_report/`, do not push rewritten history, and require explicit user direction before destructive or publishing operations.
+These skills are intentionally local-first: they write reports under `_ai_report/`, do not push rewritten history, and require explicit user direction before destructive or publishing operations.
 
 ## Validation
 

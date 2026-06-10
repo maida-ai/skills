@@ -1,12 +1,13 @@
-# PR Split Plan
+# Split Plan
 
+Save as: `_ai_report/pr-<PR_NUMBER>-<DATE>.md`, `_ai_report/commit-<COMMITID>-<DATE>.md`, or `_ai_report/local-split-<DATE>.md`
 Generated: <DATE>
 Repository: <OWNER>/<REPO>
-PR: <PR_NUMBER>
+PR: <PR_NUMBER or none>
 Base branch: <BASE_REF>
 Merge base: <BASE_SHA>
 Backup branch: <BACKUP_BRANCH>
-PR URL: <PR_URL>
+PR URL: <PR_URL or none>
 
 ## Goal
 

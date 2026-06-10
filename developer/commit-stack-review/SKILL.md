@@ -25,7 +25,7 @@ Do not reimplement the helper scripts unless they fail and the user asks for deb
 - Never squash, drop, reorder, or push commits unless the user explicitly asks.
 - Never run `git add .`, `git add -A`, `git add --all`, `git add -u`, or `git commit -a`.
 - Stage only explicit files relevant to the current review comment and current atomic commit.
-- Keep `_review_report/` local and unstaged unless the user asks to include it in the PR.
+- Keep `_ai_report/` local and unstaged unless the user asks to include it in the PR.
 - Never post GitHub replies automatically; draft optional replies in the report.
 - Use editor-safe rebase continuation: `GIT_EDITOR=true git rebase --continue`.
 
@@ -34,8 +34,8 @@ Do not reimplement the helper scripts unless they fail and the user asks for deb
 1. Identify `OWNER`, `REPO`, `PR`, `BASE_REF`, and `BASE`.
 2. Check `git status --porcelain`; stop on dirty state unless the user directs preservation.
 3. Create `BACKUP_BRANCH="backup/pr-${PR}-before-review-fixes-$(date +%Y%m%d-%H%M%S)"` with `git branch "$BACKUP_BRANCH"`.
-4. Extract review comments into `_review_report/pr-${PR}-comments-$(date +%Y%m%d).json`.
-5. Create or update `_review_report/pr-${PR}-$(date +%Y%m%d).md` from `assets/review-report-template.md`.
+4. Extract review comments into `_ai_report/pr-${PR}-comments-$(date +%Y%m%d).json`.
+5. Create or update `_ai_report/pr-${PR}-$(date +%Y%m%d).md` from `assets/review-report-template.md`.
 6. Stop before rebasing if any actionable comment is unmatched or mapped only by unsafe subject assumptions.
 7. Start one interactive rebase from `BASE` and mark only commented commits as `edit`.
 8. At each stop, inspect the matching comments, make only commit-local fixes, stage explicit files, amend if needed, and continue with `GIT_EDITOR=true git rebase --continue`.
@@ -64,8 +64,8 @@ if [ -z "$SKILL_DIR" ]; then
   echo "Set SKILL_DIR to the installed commit-stack-review skill directory" >&2
   exit 1
 fi
-mkdir -p _review_report
-COMMENTS_JSON="_review_report/pr-${PR}-comments-$(date +%Y%m%d).json"
+mkdir -p _ai_report
+COMMENTS_JSON="_ai_report/pr-${PR}-comments-$(date +%Y%m%d).json"
 "$SKILL_DIR/scripts/get-review-comments" -o "$OWNER" -r "$REPO" -p "$PR" -u > "$COMMENTS_JSON"
 ```
 
