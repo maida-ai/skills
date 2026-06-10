@@ -24,7 +24,7 @@ Do not duplicate review comments: a GitHub review thread appears once, with repl
 4. Run the bundled helper to collect commit order plus review threads and replies:
 
 ```bash
-SKILL_DIR="${CLAUDE_SKILL_DIR:-}"
+SKILL_DIR="${SKILL_DIR:-}"
 if [ -z "$SKILL_DIR" ]; then
   echo "Set SKILL_DIR to the installed review-stack skill directory" >&2
   exit 1

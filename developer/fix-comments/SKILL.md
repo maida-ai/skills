@@ -56,10 +56,10 @@ git fetch origin "$BASE_REF"
 BASE="$(git merge-base HEAD "origin/$BASE_REF")"
 ```
 
-Run the helper from the target repository root. Resolve `SKILL_DIR` to this skill's directory first. In Claude Code, `${CLAUDE_SKILL_DIR}` is available for this purpose.
+Run the helper from the target repository root. Resolve `SKILL_DIR` to this skill's installed directory first, using the skill path provided by the current coding tool.
 
 ```bash
-SKILL_DIR="${CLAUDE_SKILL_DIR:-}"
+SKILL_DIR="${SKILL_DIR:-}"
 if [ -z "$SKILL_DIR" ]; then
   echo "Set SKILL_DIR to the installed fix-comments skill directory" >&2
   exit 1

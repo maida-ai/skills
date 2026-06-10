@@ -4,7 +4,7 @@ def fail($message): error("get-review-comments: \($message)");
 
 | if ($pr.commits.totalCount // 0) > ($pr.commits.nodes | length) then
     fail("PR has \($pr.commits.totalCount) commits, but this helper fetched \($pr.commits.nodes | length); commit pagination is not yet supported")
-  elif any($pr.reviewThreads.nodes[]?; ((.comments.totalCount // 0) > (.comments.nodes | length))) then
+  elif any(.[] | .data.repository.pullRequest.reviewThreads.nodes[]?; ((.comments.totalCount // 0) > (.comments.nodes | length))) then
     fail("at least one review thread has more comments than fetched; nested comment pagination is not yet supported")
   else
     .

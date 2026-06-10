@@ -130,4 +130,4 @@ Run the local structural validator before publishing changes:
 ./scripts/validate-skills
 ```
 
-The validator checks the portable Agent Skills shape: `SKILL.md` frontmatter, kebab-case names matching folder names, description length, concise skill bodies, executable bundled scripts, and referenced resource folders.
+The validator checks the portable Agent Skills shape: `SKILL.md` frontmatter, kebab-case names matching folder names, description length, concise skill bodies, and executable bundled scripts.
