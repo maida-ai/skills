@@ -21,19 +21,58 @@ Additional families can be added as the repository grows.
 
 Skills are installed by copying each skill folder into the local skills directory for your agent. The family directory is only for source organization; installed skills should be direct children of the target skills directory.
 
-Install all developer skills for OpenAI Codex:
+### OpenAI Codex
+
+Inside Codex, use the built-in skill installer with the GitHub skill folders:
+
+```text
+Use $skill-installer to install these GitHub skills:
+https://github.com/maida-ai/skills/tree/main/developer/commit-stack-review
+https://github.com/maida-ai/skills/tree/main/developer/split-pr-stack
+https://github.com/maida-ai/skills/tree/main/developer/fix-issue
+```
+
+For local development from a checkout:
 
 ```bash
 ./scripts/install-skills developer
 ```
 
-Install all developer skills for Claude Code:
+By default, this installs to `$HOME/.agents/skills`.
+
+### Claude Code
+
+Claude Code loads personal skills from `$HOME/.claude/skills`. From a checkout:
 
 ```bash
 ./scripts/install-skills --target claude developer
 ```
 
-Install one skill for Codex:
+You can also ask Claude Code to clone this repository and run that installer:
+
+```text
+Clone https://github.com/maida-ai/skills and run ./scripts/install-skills --target claude developer.
+```
+
+For project-local Claude Code skills, copy the desired skill folders into `.claude/skills/` in the target repository.
+
+### Generic Agent Skills Clients
+
+For tools that support the Agent Skills directory format but use a different skills directory, install with `--dest`:
+
+```bash
+./scripts/install-skills --dest /path/to/tool/skills developer
+```
+
+If the tool has its own GitHub skill installer, point it at the individual skill folders under:
+
+```text
+https://github.com/maida-ai/skills/tree/main/developer/
+```
+
+### Local Installer Options
+
+Install one skill:
 
 ```bash
 ./scripts/install-skills developer/split-pr-stack
@@ -49,12 +88,6 @@ Preview what would be installed:
 
 ```bash
 ./scripts/install-skills --dry-run developer
-```
-
-By default, the installer uses `$HOME/.agents/skills` for Codex and `$HOME/.claude/skills` for Claude Code. To install somewhere else:
-
-```bash
-./scripts/install-skills --dest /path/to/skills developer
 ```
 
 ## Basic Demo
