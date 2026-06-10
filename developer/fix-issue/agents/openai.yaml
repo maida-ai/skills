@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fix Issue"
+  short_description: "Resolve one GitHub issue locally"
+  default_prompt: "Use $fix-issue to address GitHub issue NUM and create the local report."

@@ -51,6 +51,11 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Local agent reports
+_ai_report/
+_review_report/
+_split_report/
+
 # Translations
 *.mo
 *.pot

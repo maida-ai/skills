@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FAILED=0
+
+error() {
+  echo "error: $*" >&2
+  FAILED=1
+}
+
+frontmatter_value() {
+  local file="$1"
+  local key="$2"
+  awk -v key="$key" '
+    NR == 1 && $0 != "---" { exit }
+    NR > 1 && $0 == "---" { exit }
+    NR > 1 && index($0, key ":") == 1 {
+      value = substr($0, length(key) + 2)
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      gsub(/^"|"$/, "", value)
+      print value
+      exit
+    }
+  ' "$file"
+}
+
+validate_skill() {
+  local skill_dir="$1"
+  local skill_file="$skill_dir/SKILL.md"
+  local dir_name
+  local name
+  local description
+  local lines
+
+  dir_name="$(basename "$skill_dir")"
+  name="$(frontmatter_value "$skill_file" "name")"
+  description="$(frontmatter_value "$skill_file" "description")"
+  lines="$(wc -l < "$skill_file" | tr -d ' ')"
+
+  [[ -n "$name" ]] || error "$skill_file missing frontmatter name"
+  [[ -n "$description" ]] || error "$skill_file missing frontmatter description"
+  [[ "$name" == "$dir_name" ]] || error "$skill_file name '$name' does not match directory '$dir_name'"
+  [[ "$name" =~ ^[a-z0-9]+(-[a-z0-9]+)*$ ]] || error "$skill_file name must be kebab-case lowercase alphanumeric"
+  (( ${#name} <= 64 )) || error "$skill_file name exceeds 64 characters"
+  (( ${#description} <= 1024 )) || error "$skill_file description exceeds 1024 characters"
+  (( lines <= 500 )) || error "$skill_file exceeds 500 lines"
+
+  if [[ -d "$skill_dir/scripts" ]]; then
+    while IFS= read -r script; do
+      [[ -x "$script" ]] || error "$script is not executable"
+    done < <(find "$skill_dir/scripts" -type f ! -name '*.jq' ! -name '*.graphql' | sort)
+  fi
+}
+
+while IFS= read -r skill_file; do
+  validate_skill "$(dirname "$skill_file")"
+done < <(find "$ROOT"/developer "$ROOT"/product -mindepth 2 -maxdepth 2 -name SKILL.md -print | sort)
+
+exit "$FAILED"
