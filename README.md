@@ -11,11 +11,11 @@ Additional families can be added as the repository grows.
 
 ## Included Developer Skills
 
-| Skill | Purpose | Source |
-|---|---|---|
-| `commit-stack-review` | Address GitHub PR review comments in the atomic commit where each comment belongs. | [maida#39](https://github.com/maida-ai/maida/pull/39) |
-| `split-pr-stack` | Split oversized PR changes or large commits into smaller reviewable atomic commits. | [maida#40](https://github.com/maida-ai/maida/pull/40) |
-| `fix-issue` | Resolve one GitHub issue locally with small commits and a local report. | `$HOME/.codex/skills/fix-issue` |
+| Skill | Purpose |
+|---|---|
+| `commit-stack-review` | Address GitHub PR review comments in the atomic commit where each comment belongs. |
+| `split-pr-stack` | Split oversized PR changes or large commits into smaller reviewable atomic commits. |
+| `fix-issue` | Resolve one GitHub issue locally with small commits and a local report. |
 
 ## Installation
 
