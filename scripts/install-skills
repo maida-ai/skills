@@ -3,17 +3,19 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-usage: scripts/install-skills [--dry-run] [--replace] [--target codex|claude] [--dest DIR] <family|family/skill>
+usage: scripts/install-skills [--dry-run] [--fail-fast] [--replace] [--target codex|claude] [--dest DIR] <family|family/skill>
 
 Examples:
   scripts/install-skills developer
   scripts/install-skills --target claude developer
   scripts/install-skills developer/split-pr-stack
+  scripts/install-skills --fail-fast developer
   scripts/install-skills --dest /tmp/agent-skills --dry-run developer
 USAGE
 }
 
 DRY_RUN=false
+FAIL_FAST=false
 REPLACE=false
 TARGET_AGENT="codex"
 DEST_DIR=""
@@ -22,6 +24,10 @@ while [[ "${1:-}" == --* ]]; do
   case "$1" in
     --dry-run)
       DRY_RUN=true
+      shift
+      ;;
+    --fail-fast)
+      FAIL_FAST=true
       shift
       ;;
     --replace)
@@ -114,15 +120,33 @@ for skill_dir in "${SKILLS[@]}"; do
   destination="$INSTALL_ROOT/$skill_name"
 
   if [[ "$DRY_RUN" == true ]]; then
-    printf 'would install %s -> %s\n' "$skill_dir" "$destination"
+    if [[ -e "$destination" && "$FAIL_FAST" == true ]]; then
+      printf 'would fail %s -> %s (already installed)\n' "$skill_dir" "$destination"
+    elif [[ -e "$destination" && "$REPLACE" == true ]]; then
+      printf 'would replace %s -> %s\n' "$skill_dir" "$destination"
+    elif [[ -e "$destination" ]]; then
+      printf 'would skip %s -> %s (already installed)\n' "$skill_dir" "$destination"
+    else
+      printf 'would install %s -> %s\n' "$skill_dir" "$destination"
+    fi
+    continue
+  fi
+
+  if [[ -e "$destination" && "$FAIL_FAST" == true ]]; then
+    echo "error: $destination already exists" >&2
+    exit 1
+  fi
+
+  if [[ -e "$destination" && "$REPLACE" == false ]]; then
+    printf 'skipped %s -> %s (already installed)\n' "$skill_name" "$destination"
+    continue
+  fi
+
+  if [[ -e "$destination" ]]; then
+    rm -rf "$destination"
+    cp -R "$skill_dir" "$destination"
+    printf 'replaced %s -> %s\n' "$skill_name" "$destination"
   else
-    if [[ -e "$destination" && "$REPLACE" == false ]]; then
-      echo "error: $destination already exists; re-run with --replace to overwrite it" >&2
-      exit 1
-    fi
-    if [[ -e "$destination" ]]; then
-      rm -rf "$destination"
-    fi
     cp -R "$skill_dir" "$destination"
     printf 'installed %s -> %s\n' "$skill_name" "$destination"
   fi

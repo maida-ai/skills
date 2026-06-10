@@ -14,6 +14,7 @@ Additional families can be added as the repository grows.
 | Skill | Purpose |
 |---|---|
 | `fix-comments` | Address GitHub PR review comments in the atomic commit where each comment belongs. |
+| `review-stack` | Review each stacked PR commit individually and write per-commit reports. |
 | `split-pr-stack` | Split oversized PR changes or large commits into smaller reviewable atomic commits. |
 | `fix-issue` | Resolve one GitHub issue locally with small commits and a local report. |
 
@@ -28,6 +29,7 @@ Inside Codex, use the built-in skill installer with the GitHub skill folders:
 ```text
 Use $skill-installer to install these GitHub skills:
 https://github.com/maida-ai/skills/tree/main/developer/fix-comments
+https://github.com/maida-ai/skills/tree/main/developer/review-stack
 https://github.com/maida-ai/skills/tree/main/developer/split-pr-stack
 https://github.com/maida-ai/skills/tree/main/developer/fix-issue
 ```
@@ -84,11 +86,19 @@ Replace an existing installed copy:
 ./scripts/install-skills --replace developer/split-pr-stack
 ```
 
+Fail if a skill is already installed:
+
+```bash
+./scripts/install-skills --fail-fast developer
+```
+
 Preview what would be installed:
 
 ```bash
 ./scripts/install-skills --dry-run developer
 ```
+
+When an installed skill already exists, the installer skips it by default, replaces it with `--replace`, or exits with an error with `--fail-fast`.
 
 ## Basic Demo
 
@@ -102,6 +112,12 @@ or:
 
 ```text
 Use $fix-comments to address this PR's review comments while preserving its atomic commit stack.
+```
+
+or:
+
+```text
+Use $review-stack to review PR 123 one atomic commit at a time.
 ```
 
 These skills are intentionally local-first: they write reports under `_ai_report/`, do not push rewritten history, and require explicit user direction before destructive or publishing operations.

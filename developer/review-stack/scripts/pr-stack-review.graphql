@@ -1,0 +1,86 @@
+query(
+  $owner: String!
+  $repo: String!
+  $pr: Int!
+  $endCursor: String
+) {
+  repository(owner: $owner, name: $repo) {
+    pullRequest(number: $pr) {
+      number
+      title
+      url
+      baseRefName
+      headRefName
+
+      commits(first: 100) {
+        totalCount
+        nodes {
+          commit {
+            oid
+            abbreviatedOid
+            messageHeadline
+            message
+            committedDate
+            url
+          }
+        }
+      }
+
+      reviewThreads(first: 100, after: $endCursor) {
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+        nodes {
+          id
+          isResolved
+          isOutdated
+          path
+          line
+          startLine
+          diffSide
+          subjectType
+
+          comments(first: 100) {
+            totalCount
+            nodes {
+              id
+              url
+              bodyText
+              createdAt
+              updatedAt
+              author {
+                login
+              }
+
+              path
+              line
+              originalLine
+              diffHunk
+
+              commit {
+                oid
+                abbreviatedOid
+                messageHeadline
+              }
+
+              originalCommit {
+                oid
+                abbreviatedOid
+                messageHeadline
+              }
+
+              pullRequestReview {
+                state
+                submittedAt
+                author {
+                  login
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

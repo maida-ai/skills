@@ -1,0 +1,7 @@
+interface:
+  display_name: "Review Stack"
+  short_description: "Review stacked PR commits"
+  default_prompt: "Use $review-stack to review PR NUM one atomic commit at a time and write per-commit reports."
+
+policy:
+  allow_implicit_invocation: true
