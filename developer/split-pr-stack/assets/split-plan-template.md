@@ -24,7 +24,7 @@ PR title/body promise:
 Review comments source:
 
 ```text
-<commit-stack-review helper JSON path or gh comments fallback path>
+<bundled helper JSON path or gh comments fallback path>
 ```
 
 Reviewer concerns that affect split boundaries:

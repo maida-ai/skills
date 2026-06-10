@@ -1,9 +1,9 @@
 ---
-name: commit-stack-review
+name: fix-comments
 description: GitHub pull request review workflow for stacked or multi-commit PRs, focused on mapping review comments to their atomic commits, preserving commit structure during fixes, maintaining a local review-resolution report, and preparing optional reply drafts. Best fit for PR review follow-up where comments belong in specific commits.
 ---
 
-# Commit Stack Review
+# Fix Comments
 
 Use this skill to address GitHub PR review comments inside the commits where they belong while preserving an atomic commit stack.
 
@@ -61,7 +61,7 @@ Run the helper from the target repository root. Resolve `SKILL_DIR` to this skil
 ```bash
 SKILL_DIR="${CLAUDE_SKILL_DIR:-}"
 if [ -z "$SKILL_DIR" ]; then
-  echo "Set SKILL_DIR to the installed commit-stack-review skill directory" >&2
+  echo "Set SKILL_DIR to the installed fix-comments skill directory" >&2
   exit 1
 fi
 mkdir -p _ai_report

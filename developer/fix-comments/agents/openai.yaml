@@ -1,0 +1,7 @@
+interface:
+  display_name: "Fix Comments"
+  short_description: "Fix PR comments inside atomic commits"
+  default_prompt: "Use $fix-comments to address this PR's review comments while preserving its atomic commit stack."
+
+policy:
+  allow_implicit_invocation: true
