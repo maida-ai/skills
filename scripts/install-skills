@@ -7,6 +7,7 @@ usage: scripts/install-skills [--dry-run] [--fail-fast] [--replace] [--target co
 
 Examples:
   scripts/install-skills developer
+  scripts/install-skills developer --replace
   scripts/install-skills --target claude developer
   scripts/install-skills developer/split-pr-stack
   scripts/install-skills --fail-fast developer
@@ -19,8 +20,9 @@ FAIL_FAST=false
 REPLACE=false
 TARGET_AGENT="codex"
 DEST_DIR=""
+TARGET=""
 
-while [[ "${1:-}" == --* ]]; do
+while [[ "$#" -gt 0 ]]; do
   case "$1" in
     --dry-run)
       DRY_RUN=true
@@ -36,7 +38,7 @@ while [[ "${1:-}" == --* ]]; do
       ;;
     --target)
       TARGET_AGENT="${2:-}"
-      if [[ -z "$TARGET_AGENT" ]]; then
+      if [[ -z "$TARGET_AGENT" || "$TARGET_AGENT" == --* ]]; then
         echo "error: --target requires codex or claude" >&2
         exit 1
       fi
@@ -44,7 +46,7 @@ while [[ "${1:-}" == --* ]]; do
       ;;
     --dest)
       DEST_DIR="${2:-}"
-      if [[ -z "$DEST_DIR" ]]; then
+      if [[ -z "$DEST_DIR" || "$DEST_DIR" == --* ]]; then
         echo "error: --dest requires a directory" >&2
         exit 1
       fi
@@ -54,17 +56,24 @@ while [[ "${1:-}" == --* ]]; do
       usage
       exit 0
       ;;
-    *)
+    --*)
       echo "error: unknown option: $1" >&2
       usage >&2
       exit 1
       ;;
+    *)
+      if [[ -n "$TARGET" ]]; then
+        echo "error: only one family or skill target may be provided" >&2
+        usage >&2
+        exit 1
+      fi
+      TARGET="$1"
+      shift
+      ;;
   esac
 done
 
-TARGET="${1:-}"
-
-if [[ -z "$TARGET" || "${2:-}" == "--help" ]]; then
+if [[ -z "$TARGET" ]]; then
   usage
   exit 0
 fi
