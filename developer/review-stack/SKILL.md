@@ -9,10 +9,10 @@ Use this skill to review a stacked GitHub PR one commit at a time. Treat each co
 
 ## Resources
 
-- `scripts/get-stack-review-context`: fetch PR commits and deduplicated review threads grouped by commit.
-- `scripts/pr-stack-review.graphql`: GraphQL query used by the helper.
-- `scripts/group-stack-review.jq`: jq transformer used by the helper.
-- `assets/commit-review-template.md`: report shape for each commit.
+- `<path-to-skill>/scripts/get-stack-review-context`: fetch PR commits and deduplicated review threads grouped by commit.
+- `<path-to-skill>/scripts/pr-stack-review.graphql`: GraphQL query used by the helper.
+- `<path-to-skill>/scripts/group-stack-review.jq`: jq transformer used by the helper.
+- `<path-to-skill>/assets/commit-review-template.md`: report shape for each commit.
 
 Do not duplicate review comments: a GitHub review thread appears once, with replies nested as context.
 
@@ -24,7 +24,7 @@ Do not duplicate review comments: a GitHub review thread appears once, with repl
 4. Run the bundled helper to collect commit order plus review threads and replies:
 
 ```bash
-SKILL_DIR="${SKILL_DIR:-}"
+SKILL_DIR="${SKILL_DIR:-<path-to-skill>}"
 if [ -z "$SKILL_DIR" ]; then
   echo "Set SKILL_DIR to the installed review-stack skill directory" >&2
   exit 1
