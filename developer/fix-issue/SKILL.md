@@ -59,12 +59,14 @@ Do not broaden the investigation into unrelated issues, PRs, releases, or extern
 
 - Create commits only for completed local changes that a developer can review.
 - Keep commits atomic when one issue naturally splits into independent changes.
+    - The key is to keep the commits reviewable and understandable on their own.
+    - If a commit is very large (>1000 lines of change), split the commit into smaller commits
 - Do not use `git push`, force-push, publish, deploy, delete branches, rewrite history, or change credentials.
 - Do not use `git rm`. If deleting a tracked file appears necessary, stop and ask the user for explicit approval.
 - Never revert unrelated user changes. If the worktree is dirty, inspect overlap and preserve unrelated edits.
 - Commit Message Rules:
     - Don't include issue number in the commit title (first line of the commit message).
-    - If applicable, add 'Fixes #NUM' as last line of the commit message.
+    - If applicable, add `Fixes #NUM` as last line of the commit message.
 - Report Rules:
     - Never stage or commit generated `_ai_report/issue-*.md` files. The report is only for the developer to review before signing off on the skill's changes.
     - Do not mention the generated report in commit messages or committed files.
