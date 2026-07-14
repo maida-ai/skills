@@ -66,11 +66,9 @@ Do not broaden the investigation into unrelated issues, PRs, releases, or extern
 - Never revert unrelated user changes. If the worktree is dirty, inspect overlap and preserve unrelated edits.
 - Commit Message Rules:
     - Don't include issue number in the commit title (first line of the commit message).
-    - If applicable, add `Fixes #NUM` as last line of the commit message.
-- Report Rules:
-    - Never stage or commit generated `_ai_report/issue-*.md` files. The report is only for the developer to review before signing off on the skill's changes.
-    - Do not mention the generated report in commit messages or committed files.
-    - Before each commit, inspect the staged diff and ensure no `_ai_report/` path is staged.
+    - Don't include internal references and resources
+    - Don't include hash numbers of any commits (those will be rewritten during merge)
+- Use `references/commit-message-template.md` for the commit message structure.
 
 ## Report
 
@@ -84,6 +82,10 @@ Use `references/report-template.md` for the report structure. Include:
 - resolution status: `[addressed]`, `[need-feedback]`, or `[skipped]`
 - verification commands and results
 - followups, or `None`
+
+- Never stage or commit generated `_ai_report/issue-*.md` files. The report is only for the developer to review before signing off on the skill's changes.
+- Do not mention the generated report in commit messages or committed files.
+- Before each commit, inspect the staged diff and ensure no `_ai_report/` path is staged.
 
 ## Final Response
 
