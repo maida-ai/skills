@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add Maida Regression Gate"
+  short_description: "Add a baseline, policy, and CI gate"
+  default_prompt: "Use $maida-add-regression-gate to add a reviewed Maida baseline, policy, and GitHub gate to this repository."
