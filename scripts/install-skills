@@ -3,12 +3,13 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE'
-usage: scripts/install-skills [--dry-run] [--fail-fast] [--replace] [--target codex|claude] [--dest DIR] <family|family/skill>
+usage: scripts/install-skills [--dry-run] [--fail-fast] [--replace] [--target codex|claude|opencode] [--dest DIR] <family|family/skill>
 
 Examples:
   scripts/install-skills developer
   scripts/install-skills developer --replace
   scripts/install-skills --target claude developer
+  scripts/install-skills --target opencode product
   scripts/install-skills developer/split-pr-stack
   scripts/install-skills --fail-fast developer
   scripts/install-skills --dest /tmp/agent-skills --dry-run developer
@@ -39,7 +40,7 @@ while [[ "$#" -gt 0 ]]; do
     --target)
       TARGET_AGENT="${2:-}"
       if [[ -z "$TARGET_AGENT" || "$TARGET_AGENT" == --* ]]; then
-        echo "error: --target requires codex or claude" >&2
+        echo "error: --target requires codex, claude, or opencode" >&2
         exit 1
       fi
       shift 2
@@ -87,8 +88,11 @@ case "$TARGET_AGENT" in
   claude)
     INSTALL_ROOT="${DEST_DIR:-${CLAUDE_SKILLS_DIR:-$HOME/.claude/skills}}"
     ;;
+  opencode)
+    INSTALL_ROOT="${DEST_DIR:-${OPENCODE_SKILLS_DIR:-${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills}}"
+    ;;
   *)
-    echo "error: --target must be codex or claude" >&2
+    echo "error: --target must be codex, claude, or opencode" >&2
     exit 1
     ;;
 esac
