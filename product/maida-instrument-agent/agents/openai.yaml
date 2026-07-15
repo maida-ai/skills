@@ -1,0 +1,4 @@
+interface:
+  display_name: "Instrument Agent with Maida"
+  short_description: "Add local Maida tracing to an agent"
+  default_prompt: "Use $maida-instrument-agent to inspect this repository and add local Maida tracing."
