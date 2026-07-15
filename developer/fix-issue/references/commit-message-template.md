@@ -21,4 +21,6 @@ Use this structure:
 <If applicable, instructions for manual verification (how to run the tests, etc.)>
 
 <If applicable, "Fixes #NUM" as the last line>
+
+Fixes #<ISSUE>
 ```

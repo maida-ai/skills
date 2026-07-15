@@ -7,7 +7,12 @@ description: "GitHub issue resolution workflow for a single numbered issue in th
 
 ## Overview
 
-Use this skill to handle exactly one GitHub issue end to end in the current repository. The only argument is an issue number `NUM`; if the user gives more than one issue, ask them to choose one.
+Use this skill to handle exactly one GitHub issue end to end in the current repository. The only argument is an issue `ISSUE`; if the user gives more than one issue, ask them to choose one.
+
+The issue `ISSUE` could be either a positive integer, a URL, or repo-path-like string. For example, issue 123 could be:
+- fix-issue 123  # Assming the current directory is the repository root
+- fix-issue owner/repo#123  # Assuming "repo" is either the current directory or a subdirectory of the current directory
+- fix-issue https://github.com/owner/repo/issues/123  # Assuming "repo" is either the current directory or a subdirectory of the current directory
 
 Do not use this skill for PR review, release work, project planning, or generic bug fixing without a GitHub issue number.
 
@@ -22,7 +27,7 @@ If `gh` reports DNS, offline, TLS, proxy, or transport connectivity failures tha
 ## Workflow
 
 1. Confirm the repository context with `pwd`, `git status --short`, and enough repo inspection to understand conventions.
-2. Validate the input before calling GitHub: `NUM` must be exactly one positive integer. If the user provides a URL, branch name, multiple issue numbers, or free text, ask for one issue number.
+2. Validate the input before calling GitHub: `ISSUE` must be exactly one positive integer. If the user provides a URL, branch name, multiple issue numbers, or free text, ask for one issue number.
 3. Fetch the issue with `gh issue view NUM --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url`.
 4. If `gh` fails for auth, throttling, or rate limits, ask the user to run `gh auth login` again. If it fails for plain network connectivity, write `Resolution: [need-feedback]` with the exact failure.
 5. Read comments for context, but treat them as secondary signal behind the issue body, current code, tests, and project instructions.
@@ -80,7 +85,8 @@ Use `references/commit-message-template.md` for the commit message structure.
 
 ## Report
 
-Always create `_ai_report/issue-NUM-DATE.md` before finishing. Create `_ai_report/` if missing.
+If a commit was created, always create `_ai_report/issue-NUM-DATE.md` before finishing.
+Create `_ai_report/` if missing.
 
 The report must remain an uncommitted local artifact. If commits are created before the report, create the report afterward. If the report exists before committing, explicitly leave it unstaged.
 
