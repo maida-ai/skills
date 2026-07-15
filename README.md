@@ -5,7 +5,7 @@ This repository collects reusable AI-agent skills for Maida work. Skills are gro
 ## Skill Families
 
 - `developer/`: skills for engineering workflows inside code repositories.
-- `product/`: reserved for skills about Maida product usage, customer workflows, and product operations.
+- `product/`: Maida adoption workflows for instrumenting agents, adding the pre-merge gate, and debugging behavioral regressions.
 
 Additional families can be added as the repository grows.
 
@@ -57,6 +57,20 @@ Clone https://github.com/maida-ai/skills and run ./scripts/install-skills --targ
 ```
 
 For project-local Claude Code skills, copy the desired skill folders into `.claude/skills/` in the target repository.
+
+### OpenCode
+
+OpenCode discovers Agent Skills from its global configuration directory and from `.opencode/skills/` in a project. From a checkout, install globally with:
+
+```bash
+./scripts/install-skills --target opencode product
+```
+
+The default destination is `${XDG_CONFIG_HOME:-$HOME/.config}/opencode/skills`. Install project-local skills with an explicit destination:
+
+```bash
+./scripts/install-skills --dest .opencode/skills product
+```
 
 ### Generic Agent Skills Clients
 
@@ -131,3 +145,9 @@ Run the local structural validator before publishing changes:
 ```
 
 The validator checks the portable Agent Skills shape: `SKILL.md` frontmatter, kebab-case names matching folder names, description length, concise skill bodies, and executable bundled scripts.
+
+Run the dependency-free installer tests with:
+
+```bash
+./tests/install-skills.sh
+```
