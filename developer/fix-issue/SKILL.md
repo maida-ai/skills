@@ -64,11 +64,19 @@ Do not broaden the investigation into unrelated issues, PRs, releases, or extern
 - Do not use `git push`, force-push, publish, deploy, delete branches, rewrite history, or change credentials.
 - Do not use `git rm`. If deleting a tracked file appears necessary, stop and ask the user for explicit approval.
 - Never revert unrelated user changes. If the worktree is dirty, inspect overlap and preserve unrelated edits.
-- Commit Message Rules:
-    - Don't include issue number in the commit title (first line of the commit message).
-    - Don't include internal references and resources
-    - Don't include hash numbers of any commits (those will be rewritten during merge)
-- Use `references/commit-message-template.md` for the commit message structure.
+
+
+## Commit Message
+
+Use `references/commit-message-template.md` for the commit message structure.
+
+- Don't include issue number in the commit title (first line of the commit message)
+- Don't include internal references and resources
+- Don't include hash numbers of any commits (those will be rewritten during merge)
+- The description / summary must be concise and to the point; avoid unnecessary details, explanations, or change list in line
+- Change list is optional; if included, it should be bulletted and only include key changes; obvious changes or minor changes should not be enumerated
+- Test list is optional; if included, it should be a list of (fenced) commands to run to verify the changes
+
 
 ## Report
 
