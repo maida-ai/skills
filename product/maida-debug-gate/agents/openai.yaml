@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debug Maida Gate"
+  short_description: "Diagnose a failing Maida regression gate"
+  default_prompt: "Use $maida-debug-gate to diagnose this failing Maida report and recommend the smallest safe response."
