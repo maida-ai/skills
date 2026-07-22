@@ -26,8 +26,10 @@ If `gh` reports DNS, offline, TLS, proxy, or transport connectivity failures tha
 
 ## Workflow
 
+**Note:** If the issue has subissues, resolve them recursively (bottom-up) using the same workflow.
+
 1. Confirm the repository context with `pwd`, `git status --short`, and enough repo inspection to understand conventions.
-2. Validate the input before calling GitHub: `ISSUE` must be exactly one positive integer. If the user provides a URL, branch name, multiple issue numbers, or free text, ask for one issue number.
+2. Validate the input before calling GitHub: `ISSUE` must be a valid issue descriptor (number, URL, or repo-path-like string). If ambiguous, ask the user to clarify.
 3. Fetch the issue with `gh issue view NUM --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url`.
 4. If `gh` fails for auth, throttling, or rate limits, ask the user to run `gh auth login` again. If it fails for plain network connectivity, write `Resolution: [need-feedback]` with the exact failure.
 5. Read comments for context, but treat them as secondary signal behind the issue body, current code, tests, and project instructions.
