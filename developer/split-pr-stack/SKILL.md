@@ -96,9 +96,16 @@ if [ -z "$SKILL_DIR" ]; then
   exit 1
 fi
 mkdir -p _ai_report
+REVIEW_PY="$SKILL_DIR/scripts/get_review_comments.py"
 REVIEW_HELPER="$SKILL_DIR/scripts/get-review-comments"
 COMMENTS_JSON="_ai_report/pr-${PR}-comments-$(date +%Y%m%d).json"
-if [ -x "$REVIEW_HELPER" ]; then
+if [ -f "$REVIEW_PY" ]; then
+  PYTHON="python3"
+  command -v python3 >/dev/null 2>&1 || PYTHON="python"
+  if ! "$PYTHON" "$REVIEW_PY" -o "$OWNER" -r "$REPO" -p "$PR" -u > "$COMMENTS_JSON" 2> "${COMMENTS_JSON}.err"; then
+    gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_ai_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
+  fi
+elif [ -f "$REVIEW_HELPER" ]; then
   if ! "$REVIEW_HELPER" -o "$OWNER" -r "$REPO" -p "$PR" -u > "$COMMENTS_JSON" 2> "${COMMENTS_JSON}.err"; then
     gh pr view "$PR" --repo "$OWNER/$REPO" --comments > "_ai_report/pr-${PR}-comments-$(date +%Y%m%d).txt"
   fi
