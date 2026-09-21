@@ -23,7 +23,9 @@ Resolution: [addressed|need-feedback|skipped]
 
 ## Verification
 
-<Commands run and results. State explicitly what was not run.>
+<For each issue acceptance criterion, give the evidence and state whether it was
+verified directly, simulated locally, or not verified. List exact commands and
+results. State explicitly what was not run.>
 
 ## Followups
 
