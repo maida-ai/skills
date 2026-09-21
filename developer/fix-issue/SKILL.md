@@ -1,16 +1,16 @@
 ---
 name: fix-issue
-description: "GitHub issue resolution workflow for a single numbered issue in the current repository, including issue lookup, repository inspection, focused implementation, regression testing, small local commits, and an uncommitted local report. Best fit for issue-number-driven bug fixes or small feature requests."
+description: "Resolve one GitHub issue and its subissues locally with focused changes, regression tests, reviewable commits, and an uncommitted report. Best for issue-number-driven fixes in the current repository."
 ---
 
 # Fix Issue
 
 ## Overview
 
-Use this skill to handle exactly one GitHub issue end to end in the current repository. The only argument is an issue `ISSUE`; if the user gives more than one issue, ask them to choose one.
+Use this skill for one root GitHub issue in the current repository (or a repository directly below the current directory). Recursively handle its subissues before resuming the parent. The only argument is an issue `ISSUE`; if the user supplies multiple root issues, ask them to choose one.
 
 The issue `ISSUE` could be either a positive integer, a URL, or repo-path-like string. For example, issue 123 could be:
-- fix-issue 123  # Assming the current directory is the repository root
+- fix-issue 123  # Assuming the current directory is the repository root
 - fix-issue owner/repo#123  # Assuming "repo" is either the current directory or a subdirectory of the current directory
 - fix-issue https://github.com/owner/repo/issues/123  # Assuming "repo" is either the current directory or a subdirectory of the current directory
 
@@ -18,47 +18,40 @@ Do not use this skill for PR review, release work, project planning, or generic 
 
 ## Prerequisites
 
-Use the GitHub CLI for issue lookup. `gh auth login` is often required before `gh issue view` can access private repositories, comments, or higher API limits.
-
-If `gh` reports missing authentication, expired credentials, API throttling, or rate limits, stop and ask the user to run `gh auth login` again. Then write the report with `Resolution: [need-feedback]` unless the user restores access in the same turn.
-
-If `gh` reports DNS, offline, TLS, proxy, or transport connectivity failures that do not appear auth-related, write `Resolution: [need-feedback]` with the exact failure. Do not suggest `gh auth login` for plain network failures.
+Use the GitHub CLI for issue lookup. If a `git`, `gh`, or `gh stack` command fails, stop this workflow and report the exact command and error to the user. Write `Resolution: [need-feedback]` when the repository is available for a local report. Leave authentication, connectivity, repository state, and other CLI failures for the user to resolve; do not run login, install an extension, change credentials or Git configuration, retry, or switch to a different lookup path automatically. A command whose documented result is a nonzero status (such as a test intentionally expecting failure) is not a CLI failure.
 
 ## Workflow
 
-**Note:** If the issue has subissues, resolve them recursively (bottom-up) using the same workflow.
+**Subissues:** List direct subissues and recursively invoke `fix-issue` for each child, deepest first. Keep the parent pending until every child has been addressed or skipped as already complete. If a child needs feedback, stop and report that blocker for the parent. Use the `gh-stack` skill to arrange the issue branches in dependency order locally: child branches below the parent branch, with one branch per issue that needs changes. Read that skill before using `gh stack`; supply non-interactive arguments. Do not push, submit PRs, sync, rebase, rewrite history, or alter Git configuration. If a local stack cannot be created safely, stop and report the error. A subissue's completion must never close its parent.
 
 1. Confirm the repository context with `pwd`, `git status --short`, and enough repo inspection to understand conventions.
-2. Validate the input before calling GitHub: `ISSUE` must be a valid issue descriptor (number, URL, or repo-path-like string). If ambiguous, ask the user to clarify.
-3. Fetch the issue with `gh issue view NUM --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url`.
-4. If `gh` fails for auth, throttling, or rate limits, ask the user to run `gh auth login` again. If it fails for plain network connectivity, write `Resolution: [need-feedback]` with the exact failure.
-5. Read comments for context, but treat them as secondary signal behind the issue body, current code, tests, and project instructions.
-6. If the issue is closed, obsolete, already fixed, invalid, or impossible to resolve safely, do not force a code change. Produce the report with `Resolution: [skipped]` or `Resolution: [need-feedback]`.
-7. If the issue is actionable, inspect nearby implementation, tests, README/config, and project instructions before editing.
-8. Use planning to determine the smallest safe fixes. If no fixes are needed, write the report with `Resolution: [skipped]` and stop.
-9. Create or switch to `issue/NUM` only when the user asked for a branch or the worktree is clean. If the worktree has unrelated changes and the user did not ask for a branch, stay on the current branch and preserve those changes.
-10. Use TDD when practical: add or update a failing regression test, run the narrowest relevant test, implement the smallest safe fix, then re-run targeted verification.
-11. Run broader checks only when the change risk justifies them and the repo supports them.
-12. Create local commits only when code/docs/test changes are ready for developer review. Use atomic commits when there are separable changes.
-13. Write `_ai_report/issue-NUM-DATE.md`, where `DATE` is the current local date in `YYYYMMDD` format. Keep the report local and uncommitted.
+2. Validate the issue descriptor (positive number, URL, or `OWNER/REPO#NUM`) and confirm that it identifies the repository being worked on.
+3. Fetch the issue, its comments, and its direct subissues as described below. Read comments as secondary signal behind the issue body, current code, tests, and project instructions.
+4. Resolve subissues bottom-up before doing the parent's implementation. Recheck the parent after the children: it may need no further change.
+5. If the issue is closed, obsolete, already fixed, invalid, or impossible to resolve safely, do not force a code change. Report `[skipped]` or `[need-feedback]`.
+6. For actionable work, inspect nearby implementation, tests, README/config, and project instructions. Identify the smallest safe fix.
+7. Create or switch to `issue/NUM` only when the user asked for a branch or the worktree is clean. If unrelated changes exist and the user did not ask for a branch, stay on the current branch and preserve them. For subissues, use the local branch stack above.
+8. Use TDD when practical: add or update a failing regression test, run the narrowest relevant test, implement the fix, then re-run targeted verification.
+9. Run broader checks when the change risk justifies them and the repository supports them. Exercise the behavior at the interface named by the issue, not only through helpers.
+10. Create local commits only when code/docs/test changes are ready for developer review. Use atomic commits when there are separable changes.
+11. Perform the final review below, then write `_ai_report/issue-NUM-DATE.md` using the current local date. Keep the report local and uncommitted.
 
 ## Issue Fetching
 
-Use `gh issue view`; prefer JSON so details and comments are available without scraping terminal output:
+For a number, use the current repository. For a URL or `OWNER/REPO#NUM`, select the indicated repository. From its working directory, use `gh repo view --json nameWithOwner` to confirm the owner and repository before any edits. Use `-R OWNER/REPO` with a number to avoid reading an issue from the wrong repository. Fetch details and comments as JSON:
 
 ```bash
-gh issue view NUM --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url
+gh issue view NUM -R OWNER/REPO --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url
 ```
 
-If JSON fields differ on the installed `gh`, use `gh issue view NUM` and `gh issue view NUM --comments` as a fallback. If `gh` cannot access the issue because authentication, throttling, or rate limits are blocking access, ask the user to run `gh auth login` again, then stop after local context checks and write `Resolution: [need-feedback]`.
+List direct subissues with `gh api --paginate "repos/OWNER/REPO/issues/NUM/sub_issues" --jq '.[].html_url'`, then apply this workflow to each returned issue URL. Keep a separate branch, closing trailer, and report for each issue that requires work. If the API call fails, stop and report the error; do not assume the issue has no children.
 
-For non-auth connectivity failures such as DNS, offline, TLS, proxy, or transport errors, stop after local context checks and write `Resolution: [need-feedback]` with the exact failure.
-
-Do not broaden the investigation into unrelated issues, PRs, releases, or external sources unless the issue itself clearly requires it.
+Do not broaden the investigation into unrelated issues, PRs, releases, or external sources unless this issue or its subissues require it.
 
 ## Resolution Rules
 
-- Use `Resolution: [addressed]` only when the implementation or documentation change needed for the issue is complete and reported.
+- Use `Resolution: [addressed]` only when the issue's acceptance criteria are met and the evidence and limits are reported. Separate actual behavior from local simulation; if a criterion explicitly requires live verification that was not performed, use `[need-feedback]`.
+- A parent may be `[addressed]` by completed subissues with no parent code change; its report must explain that result and note how the parent issue will be closed after the children land.
 - Use `Resolution: [need-feedback]` when the issue is ambiguous, blocked on missing information, requires product judgment, or cannot be accessed.
 - Use `Resolution: [skipped]` when the issue is stale, expired, already fixed, non-actionable, superseded, or unsafe to change.
 
@@ -75,14 +68,14 @@ Do not broaden the investigation into unrelated issues, PRs, releases, or extern
 
 ## Commit Message
 
-Use `references/commit-message-template.md` for the commit message structure.
+Read and follow `references/commit-message-template.md` for every commit. Its `**Changes**` and `**Tests**` sections are required.
 
 - Don't include issue number in the commit title (first line of the commit message)
 - Don't include internal references and resources
 - Don't include hash numbers of any commits (those will be rewritten during merge)
-- The description / summary must be concise and to the point; avoid unnecessary details, explanations, or change list in line
-- Change list is optional; if included, it should be bulletted and only include key changes; obvious changes or minor changes should not be enumerated
-- Test list is optional; if included, it should be a list of (fenced) commands to run to verify the changes
+- Keep the summary concise and explain the decision. Put key changes in bullets under `**Changes**`, and executed checks with results under `**Tests**`; if no check ran, state why.
+- Put `Closes #NUM` only on the final, top commit for that completed issue, never on an earlier commit or a child commit for its parent. If a prerequisite commit is in another repository, it may use `Refs OWNER/REPO#NUM` for traceability; that does not replace the issue's `Closes` trailer.
+- Do not create an empty commit solely to carry a closing keyword. If the parent needs no commit after its subissues, report how it was addressed and that its closure remains a followup.
 
 
 ## Report
@@ -102,6 +95,10 @@ Use `references/report-template.md` for the report structure. Include:
 - Never stage or commit generated `_ai_report/issue-*.md` files. The report is only for the developer to review before signing off on the skill's changes.
 - Do not mention the generated report in commit messages or committed files.
 - Before each commit, inspect the staged diff and ensure no `_ai_report/` path is staged.
+
+## Final Review Before Sign-off
+
+Re-read the issue's acceptance criteria and check each against the resulting behavior. Record what passed, what was simulated, what could not be verified, and the exact commands/results in the report. Re-run relevant checks if code changed since they last passed. Review the final diff and Git status, confirm the commits and their message structure, confirm each closing trailer belongs only to its own issue's final commit, and confirm every generated report exists and remains uncommitted. For a stack, check the local branch order with `gh stack view --json`. Stop and report any Git or GitHub CLI error rather than attempting repair.
 
 ## Final Response
 
