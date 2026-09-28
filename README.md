@@ -11,6 +11,10 @@ maida demo --regression
 
 Expect a deliberate FAIL and a PR-comment preview. Continue with the [released coding-agent walkthrough](https://maida.ai/docs/getting-started/): capture one task, review a few checks, prove pass/fail/repair, then add CI. Runnable examples and demos live together in [maida-tutorials](https://github.com/maida-ai/maida-tutorials).
 
+## Versioning
+
+Skills in this repository are installed from a chosen source revision. If the repository begins publishing numbered releases, use the tested Maida engine's `MAJOR.MINOR` compatibility line, an independent `PATCH` number, and immutable full `vMAJOR.MINOR.PATCH` tags. State which Maida CLI and Action releases a skill was tested with; matching numbers alone do not establish feature parity. See the [Maida versioning policy](https://github.com/maida-ai/maida/blob/main/CONTRIBUTING.md#versioning-and-compatibility).
+
 ## Skill Families
 
 - `developer/`: skills for engineering workflows inside code repositories.
