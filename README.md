@@ -2,6 +2,15 @@
 
 This repository collects reusable AI-agent skills for Maida work. Skills are grouped by family in the source tree, then installed into an agent's local skills directory by skill name.
 
+## First time using Maida?
+
+```bash
+uv tool install "maida-ai==0.5.3"
+maida demo --regression
+```
+
+Expect a deliberate FAIL and a PR-comment preview. Continue with the [released coding-agent walkthrough](https://maida.ai/docs/getting-started/): capture one task, review a few checks, prove pass/fail/repair, then add CI. Runnable examples and demos live together in [maida-tutorials](https://github.com/maida-ai/maida-tutorials).
+
 ## Skill Families
 
 - `developer/`: skills for engineering workflows inside code repositories.
