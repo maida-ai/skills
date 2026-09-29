@@ -5,7 +5,7 @@ This repository collects reusable AI-agent skills for Maida work. Skills are gro
 ## First time using Maida?
 
 ```bash
-uv tool install "maida-ai==0.5.3"
+uv tool install "maida-ai==0.6.0"
 maida demo --regression
 ```
 
