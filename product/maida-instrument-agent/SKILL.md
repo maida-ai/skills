@@ -1,69 +1,32 @@
 ---
 name: maida-instrument-agent
-description: "Inspect a Python agent repository and add the smallest reviewable Maida instrumentation using a supported framework adapter or the core tracing API. Use when asked to trace, instrument, or capture the structural behavior of a LangChain/LangGraph, OpenAI Agents SDK, CrewAI, or custom Python agent with Maida."
+description: "Capture one coding-agent task or add local Maida tracing to a Python tool-calling agent. Use for first-run Maida setup, capture, or instrumentation; choose the supported integration from the actual repository."
 ---
 
-# Instrument an Agent with Maida
+# Capture one useful task
 
-Add local Maida tracing without changing the agent's intended behavior. Prefer an existing framework adapter, preserve repository conventions, and prove that a deterministic run produces inspectable structural evidence.
+Start from the [released coding-agent walkthrough](https://maida.ai/docs/getting-started/). Read only the stage needed for this task. Inspect installed help before selecting commands. Reviewed `init --from-run` / `--reviewed` requires Maida 0.6 or newer; Maida 0.5.x has a separate compatibility path.
 
-## Safety contract
+## Inspect and choose
 
-- Keep all traces local. Do not upload traces, call cloud services for Maida, enable telemetry, or print secrets or full sensitive payloads.
-- Do not run an agent that can call a model, network service, or side-effecting tool unless the user explicitly authorizes that run. Prefer existing fake, stubbed, or offline tests.
-- Do not commit, push, create or edit a pull request, or publish anything without explicit authorization. A request to instrument does not grant that authorization.
-- Preserve unrelated changes. Never overwrite existing tracing or configuration silently.
-- Keep redaction enabled for verification.
+Read repository instructions, working-tree changes, package/lock files, the agent configuration and one relevant test. Identify a bounded task the owner already cares about, its expected result, and the capture surface. Briefly state the files and command you will use, then do the authorized work. Preserve existing user edits and hooks.
 
-## Workflow
+- **Coding agent:** use its existing native emitter or supported capture integration. The repository can be any language. Do not require Python instrumentation of the user's application. The [guided task](https://github.com/maida-ai/maida-tutorials/blob/main/guides/coding-agent.md) includes a safe additive capture-hook installer.
+- **Python tool-calling agent:** install `maida-ai` into the project interpreter using its package manager; an isolated tool install does not expose the library. Wrap one complete invocation with `@trace` and record actual boundaries. Preserve return values, exceptions and existing callbacks.
+- **Unsupported capture:** name the missing signal/integration and leave a concrete next step. Do not fabricate evidence or describe all coding agents as supported.
 
-### 1. Inspect before editing
+Supported integrations: local Claude Code hooks or OTel receiver; OpenCode native trace plugin; LangChain/LangGraph callback handler; OpenAI Agents SDK tracing processor; custom Python recorders. CrewAI support ends at v0.5.3 and the extra was removed from later development; inspect the installed release and compatibility guide before selecting the retained adapter.
 
-- Read repository agent instructions, `git status`, the tree, README, dependency and lock files, tests, and the actual agent entrypoint.
-- Identify the language, package manager, framework and version, invocation path, existing callbacks/hooks, and current test strategy. Do not infer them from the request alone.
-- Search for existing Maida instrumentation and configuration. If the entrypoint is not Python, or the installed framework/version has no supported integration, explain the mismatch and stop before editing instead of inventing an adapter.
-- Inspect the installed Maida API or the repository's pinned documentation when versions may differ. Do not assume examples from another version are valid.
+## Capture and verify
 
-### 2. Select the narrowest integration
+Use a temporary `MAIDA_DATA_DIR` shared by the agent process and every Maida command. Preserve the user's HOME and existing storage. Keep telemetry local: an OTel receiver is a loopback process, not telemetry to Maida. Do not enable uploads or usage pings.
 
-Use the first matching path:
+For coding-agent hooks, preserve existing settings, observe supported lifecycle events, and finish the session normally; SessionEnd imports the segment. Read the [hook integration](https://maida.ai/docs/claude-code/#passive-command-hook-fallback) for exact configuration. Hook evidence covers tool/lifecycle behavior; it does not establish full LLM, token, latency, or subagent coverage. Reuse recorded offline events for verification; an actual model run requires the user's existing authorization and budget.
 
-- **LangChain or LangGraph:** wrap the entrypoint with `@trace`, create `maida.integrations.LangChainCallbackHandler`, and pass it through the framework's existing callback configuration.
-- **OpenAI Agents SDK:** import `maida.integrations.openai_agents` to register its tracing processor and wrap the entrypoint with `@trace`.
-- **CrewAI:** import `maida.integrations.crewai` to register execution hooks and wrap the crew or flow entrypoint with `@trace`.
-- **Custom Python loop:** wrap the real run boundary with `@trace` and place `record_llm_call`, `record_tool_call`, and `record_state` at the existing execution boundaries. Do not fabricate events merely to satisfy a test.
+For Python, use an existing offline fixture, supported adapter or fake provider. Add a regression test that proves output and exception behavior are unchanged, a complete trace is produced, and a fake secret is redacted. Never synthesize tool calls in production just to satisfy a policy.
 
-Adapters require an active Maida run. Put the trace boundary around one complete agent invocation, not around individual helper calls. Keep framework-specific data in adapter metadata rather than changing Maida's event model.
+Keep the first task small enough to finish in a minute or two, such as finding the test command and citing its configuration without edits. Aim for the first report within 10–15 minutes including setup; this is a target, not a measured activation claim. Run `maida list` in the capture environment, then `maida assert --expect-status ok --no-loops --no-guardrails` for a first check of the observed completion, loops and guardrails. No baseline is needed. Inspect any existing `.maida/policy.yaml` first because `assert` also loads it. Explain that this checks only those recorded signals and does not establish answer correctness. If capture is empty, incomplete, or from another task, fix capture before generating a baseline. The demo explains the product; it is not evidence about the user's task.
 
-### 3. Present the change plan
+## Finish this stage
 
-Before mutation, state:
-
-- the detected entrypoint and integration path;
-- the dependency command, source files, and tests to change;
-- the exact offline verification commands and isolated trace directory;
-- any uncertainty or behavior that needs user confirmation.
-
-Use the repository's existing package manager. Add only the matching `maida-ai` dependency or extra; do not switch package managers or add unrelated packages.
-
-### 4. Implement a reviewable slice
-
-- Add or update a focused test first when practical. The test must fail without the instrumentation and use fake/local models and stub tools.
-- Add the trace boundary and adapter registration with the fewest necessary source edits.
-- Preserve function signatures, return values, exception behavior, tool ordering, and existing callback configuration.
-- Route payloads through Maida's recorder or adapter so its redaction and truncation remain active. Do not add ad hoc payload logging.
-
-### 5. Verify local evidence
-
-Use a temporary `MAIDA_DATA_DIR` for tests and smoke runs so the user's real `~/.maida` state is untouched. Run the narrow test first, then the repository's broader configured checks when proportionate. For an authorized deterministic invocation, verify:
-
-- the agent result and error behavior are unchanged;
-- `maida list --json` shows one completed run under the isolated data directory;
-- the trace contains the expected LLM/tool structure and no raw secret fixture;
-- an error-path test still writes terminal evidence and propagates the original failure.
-
-Do not treat an import-only test as sufficient evidence. Do not make a live provider call just to obtain a trace.
-
-### 6. Hand off for review
-
-Show `git diff` and summarize the structural evidence, commands run, results, risks, and files needing manual review. Leave changes uncommitted unless the user separately requests a commit.
+Report the task, observed signals, coverage gaps, exact commands and results. Point to `maida-add-regression-gate` for reviewing baseline/policy candidates. Leave unrelated files alone. Commit, push, send messages, run hosted services, or accept changed baselines only within explicit user authorization already provided in the session; do not ask again for authorization already given.

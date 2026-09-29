@@ -18,7 +18,9 @@ Do not use this skill for PR review, release work, project planning, or generic 
 
 ## Prerequisites
 
-Use the GitHub CLI for issue lookup. If a `git`, `gh`, or `gh stack` command fails, stop this workflow and report the exact command and error to the user. Write `Resolution: [need-feedback]` when the repository is available for a local report. Leave authentication, connectivity, repository state, and other CLI failures for the user to resolve; do not run login, install an extension, change credentials or Git configuration, retry, or switch to a different lookup path automatically. A command whose documented result is a nonzero status (such as a test intentionally expecting failure) is not a CLI failure.
+Use the GitHub CLI for issue lookup. If facing connectivity issues when working with `gh` or `git`, stop this workflow and report the exact command and error to the user.
+
+Do not run login, install an extension, change credentials or Git configuration, retry, or switch to a different lookup path automatically. A command whose documented result is a nonzero status (such as a test intentionally expecting failure) is not a CLI failure.
 
 ## Workflow
 
@@ -44,7 +46,7 @@ For a number, use the current repository. For a URL or `OWNER/REPO#NUM`, select 
 gh issue view NUM -R OWNER/REPO --json number,title,state,body,author,labels,assignees,createdAt,updatedAt,closedAt,comments,url
 ```
 
-List direct subissues with `gh api --paginate "repos/OWNER/REPO/issues/NUM/sub_issues" --jq '.[].html_url'`, then apply this workflow to each returned issue URL. Keep a separate branch, closing trailer, and report for each issue that requires work. If the API call fails, stop and report the error; do not assume the issue has no children.
+List direct subissues with `gh issue view --repo OWNER/REPO NUM --json subIssues -q '.subIssues.nodes[].url'`, then apply this workflow to each returned issue URL. Keep a separate branch, closing trailer, and report for each issue that requires work. If the API call fails, stop and report the error; do not assume the issue has no children.
 
 Do not broaden the investigation into unrelated issues, PRs, releases, or external sources unless this issue or its subissues require it.
 
@@ -98,7 +100,7 @@ Use `references/report-template.md` for the report structure. Include:
 
 ## Final Review Before Sign-off
 
-Re-read the issue's acceptance criteria and check each against the resulting behavior. Record what passed, what was simulated, what could not be verified, and the exact commands/results in the report. Re-run relevant checks if code changed since they last passed. Review the final diff and Git status, confirm the commits and their message structure, confirm each closing trailer belongs only to its own issue's final commit, and confirm every generated report exists and remains uncommitted. For a stack, check the local branch order with `gh stack view --json`. Stop and report any Git or GitHub CLI error rather than attempting repair.
+Re-read the issue's acceptance criteria and check each against the resulting behavior. Record what passed, what was simulated, what could not be verified, and the exact commands/results in the report. Re-run relevant checks if code changed since they last passed. Review the final diff and Git status, confirm the commits and their message structure, confirm each closing trailer belongs only to its own issue's final commit, and confirm every generated report exists and remains uncommitted. For a stack, check the local branch order with `gh stack view --json`.
 
 ## Final Response
 

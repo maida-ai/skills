@@ -1,83 +1,44 @@
 ---
 name: maida-add-regression-gate
-description: "Add a reviewed Maida baseline, policy-as-code configuration, and GitHub Actions behavioral regression gate to an already instrumented agent repository. Use when asked to establish known-good agent behavior, configure maida assert, scaffold maida-ai/maida-assert, or add Maida pre-merge CI protection."
+description: "Turn captured coding-agent or Python-agent runs into a reviewed baseline and small behavioral policy, prove a local pass/fail/repair loop, and prepare CI when requested. Use for first Maida gates and onboarding."
 ---
 
-# Add a Maida Regression Gate
+# Protect one task
 
-Turn an existing deterministic Maida trace into a reviewable baseline and pre-merge gate. Use the CLI scaffolder as the source of truth, then replace its placeholders with the repository's real offline agent command and baseline path.
+Use the [released coding-agent route](https://maida.ai/docs/getting-started/). Inspect the installed CLI version/help and repository instructions before editing. Use the installed version: Maida 0.6 and newer provide reviewed `init`; Maida 0.5.x needs the compatibility route below. Do not silently switch to development main.
 
-## Safety contract
+## Establish the evidence
 
-- Keep runs and inspection local. Do not upload traces, invoke hosted models, expose credentials, or trigger GitHub Actions during setup.
-- Do not commit, push, create or edit a pull request, or publish anything without explicit authorization. Adding workflow files locally is not authorization to activate them remotely.
-- Never use `--force` over existing policy or workflow files without explicit approval. Merge with existing CI and preserve unrelated user changes.
-- Never create a baseline from an unreviewed, failing, live-provider, or nondeterministic run.
-- Never weaken policy or update a baseline merely to make a failure pass. Intentional baseline changes belong in the explicit `maida accept --reason` workflow after diagnosis.
+Inspect the working tree, actual task/entrypoint, existing `.maida` files, dependency lock and CI. Keep one known-good task/session group, agent/configuration identity and fresh isolated `MAIDA_DATA_DIR`. Verify a completed trace belongs to that task and has the signals the intended checks require. Use the user's existing capture; do not replace it with a demo. If the library is needed, install it in the project interpreter, not just as an isolated CLI.
 
-## Workflow
+State the concrete files and offline verification commands, then proceed within existing authorization. Preserve existing baseline/policy/workflow files and merge deliberately instead of using `--force`.
 
-### 1. Inspect the repository and current evidence
+## Generate candidates, then review
 
-- Read repository instructions, `git status`, README, dependency and lock files, CI workflows, tests, agent entrypoint, and existing `.maida` files.
-- Confirm Maida instrumentation encloses one complete agent invocation and identify a deterministic command that exercises it without network access or side effects.
-- Confirm the existing package manager and the locally available `maida` version. Read that version's `maida init`, `baseline`, `assert`, and policy help or docs before relying on flags.
-- If there is no deterministic known-good run, stop and explain what test fixture or instrumentation is missing. Do not substitute `maida demo`; the baseline must describe the target agent.
+If `maida init --help` includes `--from-run`, run `maida init --from-run latest` in the isolated known-good evidence directory. Check the printed workflow and trace ID, then inspect `.maida/starter/policy.yaml` and `review.json`. The draft is inactive. After explicit review, activate with `maida init --reviewed --reason "the accepted task requirements"`; Maida validates the edited candidates and records the accepted hashes.
 
-### 2. Present the change plan
+For Maida 0.5.x, use `maida extract --window "$MAIDA_DATA_DIR/runs" --out maida-draft`. Read `draft.json`, select the matching workflow's printed `artifact_dir`, and inspect its `policy.yaml` and `baseline.json`. Follow the [compatibility walkthrough](https://github.com/maida-ai/maida-tutorials/blob/main/guides/coding-agent-0.5.md) for review and installation of the pair. Check grouping, provenance and observed tools in either path; do not silently combine unrelated sessions.
 
-Before mutation, state:
+Propose at most a few checks the owner can understand. Successful completion, no loops and no guardrail aborts can be candidate invariants when supported by the observations. Remove incidental path, timing and count requirements unless the user adopts them. Do not invent forbidden tools the repository lacks. One successful trace is sampled evidence, not a reliability guarantee. Do not lower an adopted threshold or change budgets to manufacture a PASS.
 
-- the exact offline agent command and why it represents known-good behavior;
-- the files `maida init --github` may create and any existing files that require a merge;
-- the proposed baseline path and meaningful policy checks;
-- the targeted verification commands and isolated `MAIDA_DATA_DIR`.
+Present the proposed checks and their evidence. An instruction to set up Maida does not itself accept inferred contracts. Prepare the draft first; require explicit owner acceptance before activating the reviewed pair at `.maida/policy.yaml` and `.maida/baselines/agent.json`. Honor specific acceptance already given in this session, and record its reason in the reviewable change.
 
-Call out that the generated workflow will not be run, committed, or pushed by this skill.
+## Prove the local loop
 
-### 3. Scaffold safely
+After acceptance, replay the known-good task with fresh mutable state, keeping baseline and candidate runs in separate windows. Select the runner that matches the evidence:
 
-- Run `maida init --github` from the repository root without `--force`.
-- Inspect `.maida/policy.yaml` and `.github/workflows/maida.yml`; do not assume creation means they are ready.
-- Replace the workflow's placeholder `agent-script` with the real repository command or script input supported by the pinned action. Point `policy` at `.maida/policy.yaml` and, after baseline creation, point `baseline` at its checked-in path.
-- Preserve the generated pinned action reference. Do not silently substitute a floating branch, an older major, or hand-written GitHub API logic.
-- Ensure workflow permissions remain least-privilege: repository contents read access and pull-request write access only when the action must post its report.
+- A fresh coding-agent capture on Maida 0.6 or newer: confirm it performed the same task from the same starting state, then `maida assert --baseline .maida/baselines/agent.json --policy .maida/policy.yaml --format json`. This evaluates one observed execution, not a population claim.
+- A fresh capture on Maida 0.5.x: use the [compatibility capture-gate helper](https://github.com/maida-ai/maida-tutorials/blob/main/onboarding/gate_capture.py) from a reviewed tutorials checkout. Run it with `uv run --no-project --with "maida-ai==0.5.3" python /path/to/maida-tutorials/onboarding/gate_capture.py --window "$MAIDA_DATA_DIR/runs" --baseline .maida/baselines/agent.json --policy .maida/policy.yaml --same-task --format json`. Confirm the sessions represent the same task first. The helper records the identity mapping and baseline hash without rewriting source artifacts. The released capture integration uses a different run name per session, so plain `drift` cannot match the new session automatically. The 0.5.x legacy `assert` omits policy-v2 invariants; its no-baseline flags are suitable only for the earlier first-signal check.
+- A native trace window with stable workflow names: `maida drift --window "$MAIDA_DATA_DIR/runs" --baseline .maida/baselines/agent.json --policy .maida/policy.yaml --format json`.
+- A traced Python script: `maida run agent.py --trials 1 --baseline .maida/baselines/agent.json --policy .maida/policy.yaml --format json`, using the project's environment. One trial is for the initial invariant-only rehearsal; statistical policies retain their configured feasible budgets.
+- A pinned coding-agent task with an existing scenario manifest: `maida scenario run`, within the authorized execution budget.
 
-### 4. Capture and review the initial baseline
+Read the command's report contract: single-run `assert --format json` reports boolean `passed` and per-check `results`; window and multi-trial gate reports expose `verdict`. Do not look for a `verdict` field in an assertion report or replace a multi-trial claim with that single-run boolean. Exit `0` can mean PASS or INCONCLUSIVE; never describe the latter as a passed check. Require a real PASS for the good task, FAIL for an intentionally regressed disposable fixture, and PASS after repair without loosening policy or replacing the baseline. Setup failure is distinct: repair missing capture, dependencies or paths and rerun. Keep payloads local and do not call a live model merely for verification.
 
-Use one temporary data directory for the agent command and all following Maida commands so the user's real `~/.maida` state remains untouched:
+## Add CI only for the requested boundary
 
-1. Run the deterministic known-good agent once.
-2. Run `maida list --json` and inspect the latest run's name, status, event counts, tools, and absence of sensitive fixture values.
-3. Run `maida baseline --out .maida/baselines/<stable-agent-name>.json`. Do not extract or pass a run ID; `baseline` selects the latest run.
-4. Inspect the baseline's structural signature: event counts, ordered tool calls, models, guardrail events, final status, and source run metadata.
-5. Show the baseline diff before proceeding. If the run is incomplete, surprising, or contains sensitive data, stop, remove it from the proposed changes, and fix the instrumentation or fixture first.
+For Maida 0.6 and newer, a reviewed starter plus `maida init --github --agent-script path/to/real_agent.py` generates a workflow for an existing traced Python entrypoint and its declared dependencies. Inspect optional dependencies and runtime configuration before enabling it. Maida 0.5.x generates placeholders that must be filled manually. In either case, use the actual entrypoint, dependencies, baseline and policy, and pin a reviewed compatible Action commit. Existing workflows need a focused merge. A stored trace alone does not provide a runnable coding-agent scenario.
 
-The baseline is behavioral evidence, not a golden output assertion. Do not hand-edit its generated structural fields.
+Follow the [Action's setup contract](https://github.com/maida-ai/maida-assert#blocking-mode-and-required-repository-settings): trusted base policy, blocking INCONCLUSIVE, workflow review protection, exact-head configuration acceptance, and a fresh verdict after a baseline commit. Do not infer enforcement from generated YAML or local tests. The actual protected-consumer acceptance/dispatch loop must have recorded remote evidence before claiming it works. Prepare local files without pushing or changing repository settings unless authorized.
 
-### 5. Make policy intentional
-
-Review the starter tolerances against the observed trace. Enable only checks supported by the repository's expected behavior. Prefer explicit pre-merge invariants such as:
-
-- `no_loops: true` when repeated behavior is never acceptable;
-- `no_new_tools: true` when the approved tool set is stable;
-- `no_guardrails: true` when guardrail activation means the run already degraded;
-- `expect_status: ok` for successful agent workflows;
-- hard caps when the team can justify stable ceilings.
-
-Explain every non-default tolerance or cap. Avoid zero-tolerance duration or token limits for nondeterministic production agents unless the project explicitly requires them.
-
-### 6. Reproduce the gate locally
-
-Under the same isolated data directory:
-
-1. Run the known-good agent again.
-2. Run `maida assert --baseline .maida/baselines/<stable-agent-name>.json` without a run ID.
-3. Confirm exit code `0`, the expected checks, and no unexpected ignored checks.
-4. Run repository tests or validation for the policy and workflow when available.
-
-Do not invoke the GitHub workflow, push a test branch, or make a provider call for verification. If the local assertion fails, diagnose it rather than loosening policy reflexively.
-
-### 7. Hand off for review
-
-Show `git diff` and summarize the baseline signature, policy decisions, generated workflow input, exact commands and exit codes, risks, and files requiring manual review. Leave all files uncommitted unless the user separately requests a commit.
+Report the reviewed checks, observed coverage, before/after verdicts, exact commands, and the next safe action. Preserve session authorization for commits and other mutations instead of asking repeatedly.
