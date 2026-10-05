@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make Release"
+  short_description: "Draft and approve a local release tag"
+  default_prompt: "Use $make-release to draft release notes and create a local annotated tag after I approve the message."
