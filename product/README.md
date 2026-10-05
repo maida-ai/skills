@@ -1,6 +1,6 @@
 # Maida Product Skills
 
-Start with the [released coding-agent walkthrough](https://maida.ai/docs/getting-started/). These portable skills support one stage at a time; you do not need to install or read all three before trying Maida. The skills select the installed command contract: a first report before baseline setup, reviewed `init` on Maida 0.6 and newer, and a separate Maida 0.5.x compatibility route.
+Start with the [released coding-agent walkthrough](https://maida.ai/docs/getting-started/). These portable skills support one stage at a time; you do not need to install or read all three before trying Maida. Maida checks agent changes before merge; these skills support that product workflow. On v0.6.1, use approved `maida init` capture setup and `maida check` for the first Claude task report, before any baseline setup. Other native emitters use explicit trace IDs. Reviewed baseline initialization remains a later stage; Maida 0.5.x has a separate compatibility route.
 
 This family contains portable Agent Skills for the developer-led Maida workflow:
 
@@ -39,4 +39,4 @@ These skills help a coding agent perform explicit Maida setup and diagnosis. The
 
 ## Workflow verification
 
-Keep a reviewed maida-tutorials checkout alongside this repository, or set `MAIDA_TUTORIALS_PATH` to its location; the fresh-session test checks for the compatibility helper and uses current `assert` on Maida 0.6. Run `UV_CACHE_DIR=/tmp/uv-cache uv run --no-project --with "maida-ai==0.6.0" python -m unittest discover -s tests -p "test_product_workflows.py" -v`. The tests use isolated temporary repositories and the published package to exercise capture, reviewed initialization, PASS, deliberate FAIL, repair and missing evidence. These scripted offline checks do not measure human unassisted activation or establish live GitHub protection.
+Keep a reviewed maida-tutorials checkout alongside this repository, or set `MAIDA_TUTORIALS_PATH` to its location; the fresh-session test checks for the compatibility helper and uses current `assert` on Maida 0.6. Run `UV_CACHE_DIR=/tmp/uv-cache uv run --no-project --with "maida-ai==0.6.1" python -m unittest discover -s tests -p "test_product_workflows.py" -v`. The tests use isolated temporary repositories and the published package to exercise capture, reviewed initialization, PASS, deliberate FAIL, repair and missing evidence. These scripted offline checks do not measure human unassisted activation or establish live GitHub protection.
