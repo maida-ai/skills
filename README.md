@@ -30,6 +30,7 @@ Additional families can be added as the repository grows.
 | `review-stack` | Review each stacked PR commit individually and write per-commit reports. |
 | `split-pr-stack` | Split oversized PR changes or large commits into smaller reviewable atomic commits. |
 | `fix-issue` | Resolve one GitHub issue locally with small commits and a local report. |
+| `make-release` | Draft release notes and create a local annotated release tag after approval. |
 
 ## Installation
 
@@ -45,6 +46,7 @@ https://github.com/maida-ai/skills/tree/main/developer/fix-comments
 https://github.com/maida-ai/skills/tree/main/developer/review-stack
 https://github.com/maida-ai/skills/tree/main/developer/split-pr-stack
 https://github.com/maida-ai/skills/tree/main/developer/fix-issue
+https://github.com/maida-ai/skills/tree/main/developer/make-release
 ```
 
 For local development from a checkout:
